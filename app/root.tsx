@@ -5,6 +5,7 @@ import {
   Form,
   Links,
   Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
@@ -40,6 +41,7 @@ export default function App() {
               <button type="submit">New</button>
             </Form>
           </div>
+  
           <nav>
             <ul>
               <li>
@@ -50,6 +52,10 @@ export default function App() {
               </li>
             </ul>
           </nav>
+        </div>
+
+        <div id="detail">
+            <Outlet />
         </div>
 
         <ScrollRestoration />
