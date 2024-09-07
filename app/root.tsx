@@ -1,10 +1,14 @@
-import { LinksFunction, json, redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import type {
+  LinksFunction,
+  LoaderFunctionArgs
+} from "@remix-run/node"
 import appStylesHref from "./app.css?url"
 import { getContacts, createEmptyContact } from './data'
+import { useEffect } from 'react'
 
 import {
   Form,
-  Link,
   Links,
   Meta,
   NavLink,
@@ -19,9 +23,13 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStylesHref }
 ];
 
-export const loader = async () => {
-  const contacts = await getContacts();
-  return json({ contacts });
+export const loader = async ({
+  request,
+}: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const query = url.searchParams.get("query");
+  const contacts = await getContacts(query);
+  return json({ contacts, query });
 }
 
 export const action = async () => {
@@ -30,8 +38,15 @@ export const action = async () => {
 }
 
 export default function App() {
-  const { contacts } = useLoaderData<typeof loader>();
+  const { contacts, query } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const searchField = document.getElementById("query");
+    if (searchField instanceof HTMLInputElement) {
+      searchField.value = query || "";
+    }
+  }, [query])
 
   return (
     <html lang="en">
@@ -47,11 +62,12 @@ export default function App() {
           <div>
             <Form id="search-form" role="search">
               <input
-                id="q"
+                id="query"
                 aria-label="Search contacts"
+                defaultValue={query || ""}
                 placeholder="Search"
                 type="search"
-                name="q"
+                name="query"
               />
               <div id="search-spinner" aria-hidden hidden={true} />
             </Form>
